@@ -2,13 +2,24 @@ import streamlit as st
 import pandas as pd
 
 from services.email_lookup import carregar_emails_unidades
-from services.email_config import configurar_email, validar_config_email
+from services.email_config import configurar_email
 from services.email_sender import enviar_emails
 from utils.text import remover_acentos
 from utils.email_form import render_email_config
 
+
+CONTAS_CORRENTES = [
+    "C/C: 032780-0 – TRAMONTINA NORTE",
+    "C/C: 029915-5 – TRAMONTINA NORDESTE",
+    "C/C: 034799-3 – TRAMONTINA PLANALTO",
+    "C/C: 014773-4 – TRAMONTINA SUDESTE",
+]
+
+
 def run(uploaded, email_user, senha):
-    df_emails, emails_unidades = carregar_emails_unidades("bases/emails_unidades.xlsx")
+    df_emails, emails_unidades = carregar_emails_unidades(
+        "bases/emails_unidades.xlsx"
+    )
 
     if not uploaded:
         st.warning("Envie um arquivo")
@@ -18,7 +29,7 @@ def run(uploaded, email_user, senha):
 
     try:
         file.seek(0)
-    except:
+    except Exception:
         pass
 
     if file.name.lower().endswith(".csv"):
@@ -49,8 +60,7 @@ def run(uploaded, email_user, senha):
         if not pdfs:
             st.info("Aguardando upload dos PDFs.")
             st.stop()
-    
-    
+
     pdf_map = {
         pdf.name.replace(".pdf", "").strip(): pdf
         for pdf in pdfs
@@ -61,14 +71,18 @@ def run(uploaded, email_user, senha):
     df["PDF"] = df["ORDEM"].map(pdf_map)
 
     df_envio = df[df["PDF"].notna()].copy()
-
     df_sem_pdf = df[df["PDF"].isna()].copy()
 
     if not df_sem_pdf.empty:
+        st.warning(
+            "Pedidos abaixo estão sem PDF e serão ignorados no envio."
+        )
 
-        st.warning("Pedidos abaixo estão sem PDF e serão ignorados no envio.")
-
-        cols = ["ORDEM", "ORIGEM"] if "ORIGEM" in df.columns else ["ORDEM"]
+        cols = (
+            ["ORDEM", "ORIGEM"]
+            if "ORIGEM" in df.columns
+            else ["ORDEM"]
+        )
 
         st.dataframe(df_sem_pdf[cols])
 
@@ -78,24 +92,29 @@ def run(uploaded, email_user, senha):
         st.warning("Nenhum pedido com PDF encontrado.")
         st.stop()
 
-    config = render_email_config(show_assunto=False)
+    # Agora o assunto e o corpo são fixos.
+    # Mantemos apenas o campo de CC.
+    config = render_email_config(
+        show_assunto=False,
+        show_corpo=False
+    )
 
     cc_input = config.get("cc_input")
-    texto_base = config.get("texto_base")
+
+    col_conta, _ = st.columns([1, 2])
+
+    with col_conta:
+        conta_corrente = st.selectbox(
+            "Selecione a conta corrente para emissão",
+            CONTAS_CORRENTES
+        )
 
     if st.button("🚀 Enviar e-mails"):
 
-        config = configurar_email(cc_input, None, texto_base)
+        config = configurar_email(cc_input)
 
-        erros = validar_config_email(config, False, True)
+        grupos = df_envio.groupby("ORIGEM")
 
-        if erros:
-            for erro in erros:
-                st.warning(erro)
-            st.stop()
-
-        grupos = df_envio.groupby("ORIGEM")    
-        
         lista_envios = []
 
         for unidade, pedidos_unidade in grupos:
@@ -106,29 +125,110 @@ def run(uploaded, email_user, senha):
 
             ordens_txt = " ".join(ordens)
 
-            assunto = f"PRÉ ALERTA DE COLETA TRAMONTINA - {ordens_txt}"
+            assunto = (
+                f"PRÉ ALERTA DE COLETA TRAMONTINA - {ordens_txt}"
+            )
 
             if isinstance(emails_to, str):
-                emails_to = [e.strip() for e in emails_to.split(",") if e.strip()]
+                emails_to = [
+                    e.strip()
+                    for e in emails_to.split(",")
+                    if e.strip()
+                ]
 
             if not emails_to:
                 continue
 
-            anexos = [pdf for pdf in pedidos_unidade["PDF"] if pdf is not None]
+            anexos = [
+                pdf
+                for pdf in pedidos_unidade["PDF"]
+                if pdf is not None
+            ]
 
-            tabela_html = pedidos_unidade.drop(columns=["PDF"]).to_html(index=False)
+            tabela_html = (
+                pedidos_unidade
+                .drop(columns=["PDF"])
+                .to_html(index=False)
+            )
 
             cc_list = config["cc"] or []
 
             if isinstance(cc_list, str):
-                cc_list = [e.strip() for e in cc_list.split(",") if e.strip()]
+                cc_list = [
+                    e.strip()
+                    for e in cc_list.split(",")
+                    if e.strip()
+                ]
 
             corpo_html = f"""
-                <p>{config['corpo']}</p>
-                <br>
+            <div style="
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                color: #000000;
+            ">
+
+                <p style="
+                    margin: 0 0 10px 0;
+                    font-size: 20px;
+                    font-weight: bold;
+                ">
+                    PRÉ ALERTA DE COLETA TRAMONTINA
+                </p>
+
+                <p style="margin: 0 0 6px 0;">
+                    Boa tarde!
+                </p>
+
+                <p style="margin: 0 0 8px 0;">
+                    Unidade por gentileza realizar a coleta, conforme dados abaixo:
+                </p>
+
+                <p style="
+                    margin: 0 0 18px 0;
+                    color: #ff0000;
+                    font-weight: bold;
+                    text-decoration: underline;
+                    font-size: 16px;
+                ">
+                    INSTRUÇÃO PARA EMISSÃO
+                </p>
+
+                <div style="
+                    background-color: #ffff00;
+                    color: #ff0000;
+                    font-weight: bold;
+                    font-size: 17px;
+                    padding: 7px 5px;
+                    margin-bottom: 12px;
+                ">
+                    Por favor realizar a Emissão na conta corrente da Tramontina :
+                    {conta_corrente}
+                </div>
+
+                <p style="
+                    margin: 0 0 14px 0;
+                    color: #ff0000;
+                    font-weight: bold;
+                    font-size: 16px;
+                ">
+                    POR FAVOR NÃO EMITIR POR DECLARAÇÃO APENAS COM NOTA FISCAL.
+                </p>
+
+                <p style="
+                    margin: 0 0 20px 0;
+                    font-weight: bold;
+                ">
+                    Caso aparecer contrato não localizado, é só retirar o Zero (0)
+                    do número de negociação que a emissão sobe.
+                </p>
+
                 {tabela_html}
+
                 <br><br>
+
                 <p><i>Mensagem automática.</i></p>
+
+            </div>
             """
 
             lista_envios.append({
@@ -146,7 +246,11 @@ def run(uploaded, email_user, senha):
             st.stop()
 
         try:
-            enviar_emails(lista_envios, email_user, senha)
+            enviar_emails(
+                lista_envios,
+                email_user,
+                senha
+            )
 
         except ValueError as e:
             st.error(str(e))
