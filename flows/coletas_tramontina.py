@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from services.email_lookup import carregar_emails_unidades
+from services.email_lookup import carregar_emails
 from services.email_config import configurar_email
 from services.email_sender import enviar_emails
 from utils.text import remover_acentos
@@ -17,8 +17,8 @@ CONTAS_CORRENTES = [
 
 
 def run(uploaded, email_user, senha):
-    df_emails, emails_unidades = carregar_emails_unidades(
-        "bases/emails_unidades.xlsx"
+    emails_unidades = carregar_emails(
+        "bases/emails_unidades.json"
     )
 
     if not uploaded:

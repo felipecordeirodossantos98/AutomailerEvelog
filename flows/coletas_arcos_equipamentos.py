@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from services.email_lookup import carregar_emails_unidades
+from services.email_lookup import carregar_emails
 from services.email_config import configurar_email
 from services.email_sender import enviar_emails
 from utils.text import remover_acentos
@@ -10,7 +10,9 @@ from services.txt_parser import parse_txt
 from io import BytesIO
 
 def run(uploaded, email_user, senha):
-    df_emails, emails_unidades = carregar_emails_unidades("bases/emails_restaurantes.xlsx")
+    emails_unidades = carregar_emails(
+        "bases/emails_restaurantes.json"
+    )
 
     dfs = [parse_txt(arq) for arq in uploaded]
     df = pd.concat(dfs, ignore_index=True)
