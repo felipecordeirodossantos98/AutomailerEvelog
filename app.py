@@ -13,7 +13,8 @@ from flows import (
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 st.set_page_config(
-    page_title="AutoMailer",
+    page_title="AutoMailer Evelog",
+    page_icon="images/evelog-favicon.svg",
     layout="wide"
 )
 
