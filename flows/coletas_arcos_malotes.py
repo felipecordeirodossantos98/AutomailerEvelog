@@ -110,16 +110,8 @@ def run(uploaded, email_user, senha):
     ]
 
     colunas_obrigatorias = [
-        "RE",
         "SIGLA",
-        "TIPO",
-        "CTE",
-        "VINCULAR_ACERTO",
         "ORDEM",
-        "SITUACAO",
-        "DT_FINALIZACAO",
-        "DIAS_FALTANTES",
-        "SITUACAO_COLETA",
         "UNIDADE",
         "EMAIL",
     ]
@@ -152,7 +144,6 @@ def run(uploaded, email_user, senha):
     # Formatação dos campos utilizados.
     df["ORDEM"] = df["ORDEM"].apply(formatar_valor)
     df["SIGLA"] = df["SIGLA"].apply(formatar_valor)
-    df["RE"] = df["RE"].apply(formatar_valor)
     df["UNIDADE"] = df["UNIDADE"].apply(formatar_valor)
     df["EMAIL"] = df["EMAIL"].apply(formatar_valor)
 
@@ -191,10 +182,6 @@ def run(uploaded, email_user, senha):
                 pedido["SIGLA"]
             )
 
-            re_unidade = formatar_valor(
-                pedido["RE"]
-            )
-
             unidade = formatar_valor(
                 pedido["UNIDADE"]
             )
@@ -203,17 +190,9 @@ def run(uploaded, email_user, senha):
                 pedido["EMAIL"]
             )
 
-            identificacao = (
-                unidade
-                or sigla
-                or re_unidade
-                or ordem
-            )
-
             if not emails_to:
 
                 registros_sem_email.append({
-                    "RE": re_unidade,
                     "SIGLA": sigla,
                     "ORDEM": ordem,
                     "UNIDADE": unidade,
@@ -353,7 +332,7 @@ def run(uploaded, email_user, senha):
             """
 
             lista_envios.append({
-                "unidade": identificacao,
+                "unidade": unidade,
                 "pedido": ordem,
                 "to": emails_to,
                 "cc": cc_list,

@@ -65,7 +65,7 @@ if uploaded:
             elif a2 in ["Codigo", "Código"]:
                 tipo_fluxo = "pre_alertas_unidades"
 
-            elif a1 == "RE":
+            elif a1 == "SIGLA":
                 tipo_fluxo = "coletas_arcos_malotes"
 
     if tipo_fluxo == "coletas_arcos_equipamentos":
