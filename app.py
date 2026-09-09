@@ -2,6 +2,19 @@ import streamlit as st
 import pandas as pd
 import sys
 import os
+import streamlit.components.v1 as components
+
+components.html(
+    """
+    <script>
+        window.parent.addEventListener("beforeunload", function (event) {
+            event.preventDefault();
+            event.returnValue = "";
+        });
+    </script>
+    """,
+    height=0,
+)
 
 from flows import (
     pre_alertas_unidades,
