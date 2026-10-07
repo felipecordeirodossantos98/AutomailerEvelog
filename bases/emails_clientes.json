@@ -18,5 +18,17 @@
       "deiziane.silva@pierserv.com.br",
       "paulo.santos@pierserv.com.br"
     ]
+  },
+  "TRAMONTINA NORDESTE S/A": {
+    "identificador": "TRAMONTINA NORDESTE S/A",
+    "emails": [
+      "atendimento@tramontinastore.com"
+    ]
+  },
+   "TRAMONTINA SUDESTE": {
+    "identificador": "TRAMONTINA SUDESTE",
+    "emails": [
+      "atendimento@tramontinastore.com"
+    ]
   }
 }
