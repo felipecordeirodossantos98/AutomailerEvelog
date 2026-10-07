@@ -16,14 +16,15 @@ components.html(
     height=0,
 )
 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from flows import (
     pre_alertas_unidades,
+    custodias_clientes,
     coletas_tramontina,
     coletas_arcos_malotes,
-    coletas_arcos_equipamentos
+    coletas_arcos_equipamentos,
 )
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 st.set_page_config(
     page_title="AutoMailer Evelog",
@@ -57,6 +58,7 @@ with col_form:
 if uploaded:
 
     tipo_fluxo = None
+    precisa_escolher_fluxo = False
 
     for file in uploaded:
         nome = file.name.lower()
@@ -76,19 +78,31 @@ if uploaded:
                 tipo_fluxo = "coletas_tramontina"
 
             elif a2 in ["Codigo", "Código"]:
-                tipo_fluxo = "pre_alertas_unidades"
+                precisa_escolher_fluxo = True
 
             elif a1 == "SIGLA":
                 tipo_fluxo = "coletas_arcos_malotes"
 
-    if tipo_fluxo == "coletas_arcos_equipamentos":
+    if precisa_escolher_fluxo:
+
+        fluxo_selecionado = st.radio(
+            "Selecione:",
+            ["Pré-alerta de Unidades", "Custódias Clientes"],
+            horizontal=True,
+            label_visibility="collapsed",
+        )
+
+        if fluxo_selecionado == "Pré-alerta de Unidades":
+            pre_alertas_unidades.run(uploaded, email_user, senha)
+
+        elif fluxo_selecionado == "Custódias Clientes":
+            custodias_clientes.run(uploaded, email_user, senha)
+
+    elif tipo_fluxo == "coletas_arcos_equipamentos":
         coletas_arcos_equipamentos.run(uploaded, email_user, senha)
 
     elif tipo_fluxo == "coletas_tramontina":
         coletas_tramontina.run(uploaded, email_user, senha)
-
-    elif tipo_fluxo == "pre_alertas_unidades":
-        pre_alertas_unidades.run(uploaded, email_user, senha)
 
     elif tipo_fluxo == "coletas_arcos_malotes":
         coletas_arcos_malotes.run(uploaded, email_user, senha)

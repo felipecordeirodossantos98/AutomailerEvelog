@@ -1,0 +1,22 @@
+{
+  "DECATHLON E-COMMERCE": {
+    "identificador": "DECATHLON E-COMMERCE",
+    "emails": [
+      "atendimento@decathlon.com",
+      "transportes.ecommerce@decathlon.com",
+      "nicolas.freitas@decathlon.com",
+      "gabriela.vasconcelos@decathlon.com",
+      "gabriela.fernandes@decathlon.com"
+    ]
+  },
+  "PS LOGISTICA E PROMOCOES ARMAZENS GERAIS LTDA": {
+    "identificador": "PS LOGISTICA E PROMOCOES ARMAZENS GERAIS LTDA",
+    "emails": [
+      "cleberson.peixoto@pierserv.com.br",
+      "taislaine.santana@pierserv.com.br",
+      "marcia.alencar@pierserv.com.br",
+      "deiziane.silva@pierserv.com.br",
+      "paulo.santos@pierserv.com.br"
+    ]
+  }
+}
