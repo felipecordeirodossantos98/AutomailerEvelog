@@ -97,6 +97,11 @@ def run(uploaded, email_user, senha):
                 </p>
                 <br>
                 <p>Obrigado, no aguardo de um retorno.</p>
+                <br>
+                <p>
+                <strong><u>Importante: Reforçamos que a nota fiscal precisa estar 
+                dentro do prazo de 30 dias a partir da data de emissão.</u></strong>
+                </p>
                 <br><br>
                 <p><i>Mensagem automática.</i></p>
             """
